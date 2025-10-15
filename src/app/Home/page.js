@@ -52,4 +52,34 @@ const Navbar = () => {
   );
 };
 
+// หน้า Home
+const Home = () => {
+  return (
+    <div>
+      <Navbar /> {/* เรียกใช้ Navbar */}
+      <div className="min-h-screen bg-white text-slate-900">
+        <div className="mx-auto max-w-3xl px-4 py-14 md:py-20">
+          {/* Logo + Title */}
+          <div className="text-center mb-10 md:mb-12">
+            <div className="mb-5 flex justify-center">
+              <Icon
+                icon="game-icons:spell-book"
+                className="h-15 w-15 text-[#0B1956]"
+                aria-hidden
+              />
+            </div>
+            <h1 className="text-4xl font-extrabold letter-spacing: 0.26px text-[#0B1956]">
+              Portfolio
+            </h1>
+
+            <p className="mt-3 text-xl md:text-2xl font-semibold text-[#426CC2]">
+              Save your projects and improve your skills
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default Home;
