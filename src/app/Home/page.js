@@ -1,5 +1,6 @@
 import React from "react";
 import { Icon } from "@iconify/react";
+import FixedBottomRightBox from "../../components/FixedBottomRightBox";
 
 const Navbar = () => {
   const userAvatarUrl = "/image/profile.jpg";
@@ -74,12 +75,15 @@ const Home = () => {
 
             <p className="mt-3 text-xl md:text-2xl font-semibold text-[#426CC2]">
               Save your projects and improve your skills
-            </p>
+            </p>                  
           </div>
         </div>
       </div>
+      {/* กล่องมุมขวาล่าง */}
+      <FixedBottomRightBox />
     </div>
   );
 };
+
 
 export default Home;
