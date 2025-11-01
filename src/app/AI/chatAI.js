@@ -59,7 +59,7 @@ async function extractPdfText(file) {
 }
 
 // 💥 แก้ไข: เพิ่ม projects เข้ามาใน Props
-const promptGemini = async ({ question, file, selectedProjects = [], projects = [], profile = null }) => {
+const promptGemini = async ({ question, file, selectedProjects = [], projects = [], profile = null , course = []}) => {
   let projectPaths = []; 
   
   // 1. ใช้ ID ใน selectedProjects ไปหา OBJECT โปรเจกต์ที่ถูกเลือก
@@ -93,6 +93,12 @@ Description: ${p.description}
 GPA: ${profile.gpa || 'ไม่ระบุ'}
 `
     : "(ยังไม่มีข้อมูลการศึกษา)";
+    const courseText = course && course.length > 0
+    ? `
+--- รายวิชาที่เรียน (${course.length} วิชา) ---
+${course.map((c, i) => `${i + 1}. ${c.courseCode}: ${c.courseName}${c.courseDescription ? `\n   - ${c.courseDescription}` : ''}`).join('\n')}
+`
+    : "(ยังไม่มีข้อมูลรายวิชา)";
     
   let fileData = "";
   if (file) {
@@ -110,18 +116,22 @@ GPA: ${profile.gpa || 'ไม่ระบุ'}
     }
   }
 
-  const system = `
+const system = `
 You are a portfolio/career coach for the user.
-Answer ONLY using the user's education background, projects, and the uploaded file content below.
+Answer ONLY using the user's education background, course taken, projects, and uploaded file content below.
 Never mention store opening hours, school semesters, or teacher instructions unless they appear in the data.
 Write answers in Thai, concise but practical with bullet points when helpful.
-Consider the user's educational background (major, GPA, institution) when giving career advice.
+Consider the user's educational background, course studied, and GPA when giving career advice.
+Analyze how their coursework aligns with their projects and career goals.
 If the needed info is not present, say: "ไม่พบข้อมูลในไฟล์/โปรเจกต์ของคุณ" and ask a focused follow-up question.`;
 
   const promptText = `${system}
 
 [User's Education Background]
 ${profileText}
+
+[User's Course]
+${courseText}
 
 [User's Projects]
 ${projectsText}
@@ -170,6 +180,7 @@ export default function ChatAI() {
   const [dynamicProjects, setDynamicProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
+  const [userCourse, setUserCourse] = useState([]);
   
   // -----------------------------------------------------------
   // Auto-Resize Logic (เดิม)
@@ -235,6 +246,7 @@ useEffect(() => {
         console.error("❌ User not logged in");
         setDynamicProjects([]);
         setUserProfile(null);
+        setUserCourse([]);
         setProjectsLoading(false);
         return;
       }
@@ -245,6 +257,7 @@ useEffect(() => {
         console.error("❌ User ID not found in localStorage");
         setDynamicProjects([]);
         setUserProfile(null);
+        setUserCourse([]);
         setProjectsLoading(false);
         return;
       }
@@ -292,12 +305,31 @@ useEffect(() => {
         setUserProfile(null);
       }
 
+            // ✅ Fetch Course(เพิ่มใหม่)
+      try {
+        const courseRes = await fetch("/api/course", { headers });
+        console.log("📡 Course response status:", courseRes.status);
+
+        if (courseRes.ok) {
+          const courseData = await courseRes.json();
+          console.log("✅ Course loaded:", courseData.length);
+          setUserCourse(courseData);
+        } else {
+          console.warn("⚠️ Course not found or error loading");
+          setUserCourse([]);
+        }
+      } catch (err) {
+        console.warn("⚠️ Error fetching course:", err);
+        setUserCourse([]);
+      }
+
       setProjectsLoading(false);
 
     } catch (err) {
       console.error("❌ Error in fetchUserData:", err);
       setDynamicProjects([]);
       setUserProfile(null);
+      setUserCourse([]);
       setProjectsLoading(false);
     }
   };
@@ -381,6 +413,7 @@ useEffect(() => {
         selectedProjects,
         projects, // 💥 ส่ง projects (dynamicProjects) เข้าไป
         profile: userProfile,
+        course: userCourse,
       });
       setChats((prev) => [...prev, { sender: "bot", text: answer || "No response." }]);
     } catch (err) {
@@ -389,7 +422,7 @@ useEffect(() => {
     } finally {
       setLoading(false);
     }
-  }, [inputValue, loading, selectedFile, selectedProjects, projects, userProfile]); // 💥 เพิ่ม projects ใน Dependencies
+  }, [inputValue, loading, selectedFile, selectedProjects, projects, userProfile, userCourse]); // 💥 เพิ่ม projects ใน Dependencies
 
   const handleAnalyze = useCallback(async () => {
     // 💥 ปรับปรุง: ใช้ selectedProjects (ที่เป็น ID) เพื่อดึง Title มาแสดงใน UI
@@ -419,6 +452,7 @@ useEffect(() => {
         selectedProjects,
         projects, // 💥 ส่ง projects (dynamicProjects) เข้าไป
         profile: userProfile,
+        course: userCourse,
       });
       setChats((prev) => [...prev, { sender: "bot", text: answer || "No response." }]);
     } catch (err) {
@@ -430,7 +464,7 @@ useEffect(() => {
     } finally {
       setLoading(false);
     }
-  }, [inputValue, selectedFile, selectedProjects, projects, userProfile]); // 💥 เพิ่ม projects ใน Dependencies
+  }, [inputValue, selectedFile, selectedProjects, projects, userProfile, userCourse]); // 💥 เพิ่ม projects ใน Dependencies
 
   const createNewChat = useCallback(() => {
     if (chats.length > 0) {

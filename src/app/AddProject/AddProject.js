@@ -123,7 +123,7 @@ function Modal({ open, onClose, onCreate }) {
     let imageUrl = DEFAULT_COVER;
     if (files[0]) {
       try {
-        imageUrl = await uploadProjectImage(files[0], idUser.idUser); // << ได้ URL จริง
+        imageUrl = await uploadProjectImage(files[0], idUser); // << ได้ URL จริง
       } catch (err) {
         console.error("Upload failed:", err);
         alert("อัปโหลดรูปไม่สำเร็จ");

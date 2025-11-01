@@ -39,9 +39,10 @@ export default function AboutMePage() {
     desc: "",
   });
 
-  const [courses, setCourses] = useState([]);
+  const [course, setCourse] = useState([]);
 
   const avatarInputRef = useRef(null);
+  
 
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
@@ -105,7 +106,7 @@ export default function AboutMePage() {
       }
 
       // ดึงข้อมูล course table
-      await loadCourses(idUser);
+      await loadCourse(idUser);
 
     } catch (error) {
       console.error("Error loading user data:", error);
@@ -115,7 +116,7 @@ export default function AboutMePage() {
     }
   }
 
-  async function loadCourses(uid) {
+  async function loadCourse(uid) {
     const { data, error } = await supabase
       .from("course")
       .select("*")
@@ -123,7 +124,7 @@ export default function AboutMePage() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setCourses(data.map(c => ({
+      setCourse(data.map(c => ({
         id: c.idCourse,
         code: c.courseCode,
         name: c.courseName,
@@ -179,7 +180,7 @@ async function addCourse(e) {
     console.log("Insert success:", data); // debug
 
     if (data && data[0]) {
-      setCourses((prev) => [
+      setCourse((prev) => [
         {
           id: data[0].idCourse,
           code: data[0].courseCode,
@@ -322,7 +323,7 @@ async function addCourse(e) {
 
       if (error) throw error;
 
-      setCourses(prev => prev.filter(c => c.id !== courseId));
+      setCourse(prev => prev.filter(c => c.id !== courseId));
       alert("ลบวิชาเรียบร้อยแล้ว!");
     } catch (error) {
       console.error("Error deleting course:", error);
@@ -661,12 +662,12 @@ async function addCourse(e) {
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="font-semibold text-[#0B1956]">My Course</h3>
                 <span className="text-sm text-[#0B1956]/60">
-                  {courses.length} items
+                  {course.length} items
                 </span>
               </div>
 
               <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-                {courses.map((c, idx) => (
+                {course.map((c, idx) => (
                   <article
                     key={c.id || idx}
                     className="rounded-full bg-gradient-to-b from-white to-[#E7EEFF] px-5 py-3 shadow-[inset_0_3px_16px_rgba(66,108,194,0.22)] relative group"

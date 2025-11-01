@@ -1,3 +1,4 @@
+//supabaseServerClient
 // File: src/lib/supabaseServerClient.ts
 import { createClient } from '@supabase/supabase-js';
 

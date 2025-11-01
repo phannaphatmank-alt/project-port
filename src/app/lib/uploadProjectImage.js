@@ -1,9 +1,10 @@
+//file:uploadProjectImage
 import { supabase } from "../lib/supabaseClient";
 
 /** อัปโหลดภาพไป Supabase Storage แล้วคืน public URL */
-export async function uploadProjectImage(file, iduser) {
+export async function uploadProjectImage(file, idUser) {
   if (!file) throw new Error("No file");
-  if (!iduser) throw new Error("Missing idUser");
+  if (!idUser) throw new Error("Missing idUser");
 
   // ทำชื่อไฟล์ให้ปลอดภัย (ตัดวรรณยุกต์/ช่องว่าง/อักขระพิเศษ)
   const safeName = file.name
@@ -11,7 +12,7 @@ export async function uploadProjectImage(file, iduser) {
     .replace(/[^\w.-]+/g, "")                         // แทนที่อักขระแปลกๆ ด้วย 
     .toLowerCase();
 
-  const filePath = 'projects/${idUser}/${Date.now()}_${safeName}';
+  const filePath = `projects/${idUser}/${Date.now()}_${safeName}`;
 
   // ✅ อัปโหลดไฟล์เข้า bucket
 const { error: upErr } = await supabase
